@@ -1,4 +1,5 @@
 import './style.css';
+import {createLatestTask} from './adapters/video-frame-driver.js';
 import {createIcons,Activity,Upload,Plus,Search,Play,Pause,SkipBack,SkipForward,Repeat,RotateCcw,Maximize,Scan,Download,ShieldCheck,Info,ChevronLeft,ChevronRight,FileJson,Image,Code,FolderOpen,X,Copy,BookOpen,Check,Layers,MousePointer2,Camera,ArrowUpRight} from 'lucide';
 import {basename,bytes,classify,download,escapeHTML as esc,expandFiles,ext,frameAt,frameTime,resourceURL,stem,normalizeSettings} from './core.js';
 import {demoData} from './demo.js';
@@ -22,6 +23,8 @@ const samples=[
 ].map((s,i)=>({...s,id:`demo-${i}`,demo:true}));
 let entries=[...samples],imported=[],active=null,adapter=null,urls=[],tab='overview',loading=false,loadId=0;
 let state={time:0,playing:false,speed:1,loop:true,background:'checker',color:'#eae6f3',zoom:'fit',border:false,rangeStart:0,rangeEnd:null};
+const seekTasks=createLatestTask();
+let seekVersion=0;
 let busy=false,lastTick=performance.now(),lastUI=0,replaceValues={};
 document.querySelector('#app').innerHTML=`
 <header><div class="brand"><div class="brand-mark">${icon('activity')}</div><span>Motion<span>Scope</span></span><small>BETA</small></div><nav aria-label="主导航"><button class="active" id="nav-workbench">预览工作台</button><button id="nav-capabilities">格式支持</button><button id="nav-guide">使用指南</button></nav><div class="header-actions"><div class="privacy">${icon('shield-check')}文件仅在本地处理</div><button id="export-top" class="quiet">${icon('download')}<span>导出检查报告</span></button></div></header>
@@ -40,7 +43,7 @@ async function getBundle(entry){if(entry.bundle)return entry.bundle;if(entry.dem
 async function buildAdapter(file,files,host,localUrls,format){if(format==='Lottie')return (await import('./adapters/standard.js')).lottieAdapter(file,files,host,localUrls);if(format==='PAG')return (await import('./adapters/standard.js')).pagAdapter(file,files,host,localUrls);if(format==='SVGA')return (await import('./adapters/standard.js')).svgaAdapter(file,files,host,localUrls);if(format==='Spine')return (await import('./adapters/spine.js')).spineAdapter(file,files,host,localUrls);if(['Video','VAP','YYEVA'].includes(format))return (await import('./adapters/video.js')).videoAdapter(file,files,host,localUrls,format==='Video'?'auto':format);const R=await import('./adapters/raster.js');if(format==='GIF')return R.gifAdapter(file,files,host,localUrls);if(format==='APNG'||format==='PNG')return R.pngAdapter(file,files,host,localUrls);if(format==='WebP')return R.webpAdapter(file,files,host,localUrls);return R.spriteAdapter(file,files,host,localUrls);}
 async function load(entry){
   if(loading)return toast('正在加载素材，请稍候。');
-  const token=++loadId;loading=true;setPlaying(false);$('#loading').classList.add('visible');$('#loading-text').textContent=`正在加载 ${entry.format} 播放器…`;
+  const token=++loadId;seekVersion++;loading=true;setPlaying(false);$('#loading').classList.add('visible');$('#loading-text').textContent=`正在加载 ${entry.format} 播放器…`;
   while(busy)await new Promise(resolve=>setTimeout(resolve,10));
   adapter?.destroy?.();adapter=null;urls.forEach(u=>URL.revokeObjectURL(u));urls=[];active=entry;replaceValues={};state.time=0;state.rangeStart=0;state.rangeEnd=null;$('#current-name').textContent=entry.name;$('#current-format').textContent=entry.format.toUpperCase();renderLibrary();updateTransport();renderInspector();
   $('#artboard').replaceChildren();$('#artboard').style.cssText='';$('#artboard').classList.toggle('bordered',state.border);
@@ -68,14 +71,38 @@ function fit(){if(!adapter)return;const box=$('#stage-center'),display=adapter.d
 function currentFrame(){if(!adapter)return 0;if(adapter.delays)return frameAt(adapter.delays,state.time*1000);return Math.min((adapter.meta.frames||1)-1,Math.floor(state.time*(adapter.meta.fps||30)));}
 function updateTransport(){const m=adapter?.meta;$('#frame-label').textContent=m?`FRAME ${String(currentFrame()).padStart(3,'0')} / ${m.frames||'—'}`:'FRAME —';$('#fps-label').textContent=m?.fps?`${Number(m.fps.toFixed(2))} FPS${adapter.delays?' AVG':m.format==='Spine'?' 采样':''}`:'—';$('#time-display').textContent=`${formatTime(state.time)} / ${formatTime(m?.duration||0)}`;$('#timeline').value=m?Math.round(state.time/m.duration*1000):0;for(const id of ['play','first','last','previous','next','timeline','screenshot'])$('#'+id).disabled=!adapter;}
 async function setPlaying(value){state.playing=!!value&&!!adapter;$('#play').innerHTML=icon(state.playing?'pause':'play');$('#play').setAttribute('aria-label',state.playing?'暂停':'播放');refreshIcons();lastTick=performance.now();if(adapter?.native){try{if(state.playing)await adapter.play();else adapter.pause();}catch(e){state.playing=false;toast(`播放被浏览器阻止，请再点击播放。${e.message||''}`);}}}
-async function seek(t,pause=true){if(!adapter)return;const target=adapter;if(pause)await setPlaying(false);state.time=Math.max(0,Math.min(t,Math.max(0,adapter.meta.duration-0.00001)));while(busy)await new Promise(resolve=>setTimeout(resolve,10));if(adapter!==target||loading)return;busy=true;try{await target.seek(state.time);}catch(e){toast(e.message);}finally{busy=false;}updateTransport();}
+async function seek(t,pause=true){
+  if(!adapter)return;
+  const target=adapter,version=++seekVersion;
+  if(pause)await setPlaying(false);
+  state.time=Math.max(0,Math.min(t,Math.max(0,target.meta.duration-0.00001)));updateTransport();
+  try{await seekTasks.run(async()=>{
+    while(busy)await new Promise(resolve=>setTimeout(resolve,10));
+    if(adapter!==target||loading||version!==seekVersion)return;
+    busy=true;try{await target.seek(state.time);}finally{busy=false;}
+    if(adapter===target&&version===seekVersion)updateTransport();
+  });}catch(e){if(adapter===target&&version===seekVersion)toast(e.message);}
+}
 async function step(delta){if(!adapter)return;const i=Math.max(0,Math.min(adapter.meta.frames-1,currentFrame()+delta));await seek(adapter.frameTime?adapter.frameTime(i):i/(adapter.meta.fps||30));}
-async function tick(now){const dt=Math.max(0,Math.min(.1,(now-lastTick)/1000));lastTick=now;if(state.playing&&adapter&&!loading){const end=state.rangeEnd??adapter.meta.duration,start=state.rangeStart;let t=adapter.native?adapter.getTime():state.time+dt*state.speed;
-    if(t>=end-.001||t<state.time-.1&&adapter.native){if(state.loop){t=start;if(adapter.native)await adapter.seek(t);}else{t=Math.max(start,end-1/(adapter.meta.fps||30));await setPlaying(false);if(adapter.native)await adapter.seek(t);}}
+async function tick(now){
+  const dt=Math.max(0,Math.min(.1,(now-lastTick)/1000));lastTick=now;
+  const target=adapter,version=seekVersion;
+  try{
+    if(!state.playing||!target||loading)return;
+    const end=state.rangeEnd??target.meta.duration,start=state.rangeStart;
+    let t=target.native?target.getTime():state.time+dt*state.speed;
+    // Native full loops are owned by the video element. Do not seek again at its wrap.
+    const nativeFullLoop=target.native&&state.loop&&start===0&&state.rangeEnd===null;
+    if(!nativeFullLoop&&(t>=end-.001||(target.native&&t<state.time-.1))){
+      if(state.loop){t=start;if(target.native)await target.seek(t);}
+      else{t=Math.max(start,end-1/(target.meta.fps||30));await setPlaying(false);if(target.native)await target.seek(t);}
+    }
+    if(adapter!==target||version!==seekVersion||loading)return;
     state.time=t;
-    if(!adapter.native&&!busy){busy=true;try{await adapter.seek(t);}catch(e){setPlaying(false);toast(e.message);}finally{busy=false;}}
-    if(now-lastUI>50){updateTransport();lastUI=now;}}
-  requestAnimationFrame(tick);
+    if(!target.native&&!busy){busy=true;try{await target.seek(t);}finally{busy=false;}}
+    if(now-lastUI>50){updateTransport();lastUI=now;}
+  }catch(e){if(adapter===target&&version===seekVersion){await setPlaying(false);toast(e.message);}}
+  finally{requestAnimationFrame(tick);}
 }
 function renderInspector(){
   const root=$('#inspector'),m=adapter?.meta;
@@ -97,10 +124,19 @@ function renderInspector(){
   }
   refreshIcons();
 }
-async function replaceResource(r,value,type){await setPlaying(false);try{await adapter.replace(r.id,value,type);replaceValues[r.id]={type,value};await adapter.seek(state.time);toast('替换已应用，仅影响本次预览');}catch(e){toast(`替换失败：${e.message}`);}}
+async function replaceResource(r,value,type){
+  if(loading||!adapter)return;
+  const target=adapter;await setPlaying(false);seekVersion++;
+  while(busy)await new Promise(resolve=>setTimeout(resolve,10));
+  if(adapter!==target||loading)return;
+  busy=true;
+  try{await target.replace(r.id,value,type);replaceValues[r.id]={type,value};await target.seek(state.time);toast('替换已应用，仅影响本次预览');}
+  catch(e){toast(`替换失败：${e.message}`);}
+  finally{busy=false;}
+}
 async function downloadSample(){const bundle=await getBundle(active);if(bundle.length===1){download(active.name,await bundle[0].arrayBuffer(),'application/octet-stream');}else {const {default:JSZip}=await import('jszip'),zip=new JSZip();for(const f of bundle)zip.file(f.name,await f.arrayBuffer());download(stem(active.name)+'-bundle.zip',await zip.generateAsync({type:'uint8array'}),'application/zip');}toast('示例文件已下载');}
 async function hashFile(f){const digest=await crypto.subtle.digest('SHA-256',await f.arrayBuffer());return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');}
-async function exportRecord(report=false){if(!adapter||!active?.file)return toast('请先载入素材。');const record={kind:'motionscope-config',schemaVersion:1,createdAt:new Date().toISOString(),file:{name:active.file.name,size:active.file.size,sha256:await hashFile(active.file)},format:adapter.meta.format,settings:{...state,playing:false},grid:active.grid||null,adapterSettings:adapter.getSettings?.()||{},replacements:Object.fromEntries(Object.entries(replaceValues).map(([k,v])=>[k,v.type==='image'?{type:'image',requiresReselect:true}:v])),...(report?{metadata:adapter.meta,warnings:adapter.warnings,environment:{userAgent:navigator.userAgent,devicePixelRatio:devicePixelRatio},sampleSource:active.demo?active.source:'本地文件',note:'报告只记录浏览器预览状态，不代表 App 真机验收通过。'}:{})};download(`${stem(active.name)}.${report?'report':'motion'}.json`,record);toast('已导出配置与文字内容；图片和原素材不会打包。');}
+async function exportRecord(report=false){if(!adapter||!active?.file)return toast('请先载入素材。');const record={kind:'motionscope-config',schemaVersion:1,createdAt:new Date().toISOString(),file:{name:active.file.name,size:active.file.size,sha256:await hashFile(active.file)},format:adapter.meta.format,settings:{...state,playing:false},grid:active.grid||null,adapterSettings:adapter.getSettings?.()||{},replacements:Object.fromEntries(Object.entries(replaceValues).map(([k,v])=>[k,v.type==='image'?{type:'image',requiresReselect:true}:v])),...(report?{metadata:adapter.meta,diagnostics:adapter.getDiagnostics?.()||null,warnings:adapter.warnings,environment:{userAgent:navigator.userAgent,devicePixelRatio:devicePixelRatio},sampleSource:active.demo?active.source:'本地文件',note:'报告只记录浏览器预览状态，不代表 App 真机验收通过。'}:{})};download(`${stem(active.name)}.${report?'report':'motion'}.json`,record);toast('已导出配置与文字内容；图片和原素材不会打包。');}
 async function restoreConfig(record){if(!adapter||!active?.file)throw new Error('请先打开原素材，再导入检查配置。');if(record.schemaVersion!==1)throw new Error('配置版本不支持。');if(await hashFile(active.file)!==record.file?.sha256)throw new Error('配置与当前素材哈希不匹配，请先打开同一份素材。');await setPlaying(false);if(adapter.restoreSettings)adapter.restoreSettings(record.adapterSettings||{});const s=normalizeSettings(record.settings,adapter.meta.duration);Object.assign(state,s);if(record.grid&&adapter.configure){adapter.configure(record.grid);active.grid=record.grid;}for(const [id,v] of Object.entries(record.replacements||{})){if(v.type==='text'&&adapter.resources.some(r=>r.id===id))await replaceResource({id},String(v.value),'text');}applyBackground(state.background);$('#bg-color').value=state.color;$('#stage').style.setProperty('--custom-bg',state.color);$('#zoom').value=state.zoom;$('#speed').value=state.speed;adapter.setSpeed?.(state.speed);$('#bounds').setAttribute('aria-pressed',state.border);$('#artboard').classList.toggle('bordered',state.border);$('#loop').classList.toggle('on',state.loop);await seek(Number(s.time)||0);fit();renderInspector();toast('配置已恢复；替换图片与场景截图需重新选择。');}
 async function screenshot(){if(!adapter)return;await setPlaying(false);try{const snapshot=adapter.snapshot();let canvas=snapshot.canvas;if(snapshot.svg){const svg=snapshot.svg.cloneNode(true);svg.setAttribute('xmlns','http://www.w3.org/2000/svg');const u=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svg)],{type:'image/svg+xml'}));try{const img=new window.Image();img.src=u;await img.decode();canvas=document.createElement('canvas');canvas.width=adapter.meta.width;canvas.height=adapter.meta.height;canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);}finally{URL.revokeObjectURL(u);}}if(!canvas)throw new Error('当前播放器未提供可导出的画布。');canvas.toBlob(blob=>{if(!blob)return toast('当前帧无法导出。');download(`${stem(active.name)}-frame-${currentFrame()}.png`,blob,'image/png');toast('已导出当前透明帧 PNG（不包含预览背景）');});}catch(e){toast(`截图失败：${e.message}`);}}
 function applyBackground(bg){state.background=bg;$('#stage').dataset.bg=bg;$('#stage-mode').textContent=({checker:'透明背景',white:'白色背景',dark:'深色背景',custom:'自定义背景',scene:'场景背景'})[bg];document.querySelectorAll('.swatch').forEach(b=>b.classList.toggle('selected',b.dataset.bg===bg));}
@@ -109,10 +145,10 @@ function capabilities(){showDialog('格式支持与能力边界',`<p>所有播�
 function guide(){showDialog('从素材到验收，只需四步',`<h3>01 · 导入原始素材</h3><p>拖入文件，或点击导入。Lottie 图片、Spine atlas 与纹理、VAP 配置应与主文件一起导入。ZIP 和 dotLottie 会自动解包。左侧每种格式都有可下载示例。</p><h3>02 · 检查每一帧</h3><p>Space 播放 / 暂停，← → 逐帧。支持多背景、缩放、边界和 A–B 区间。视频定位是近似定位；Spine 时间线为 30 FPS 检查采样。</p><h3>03 · 检查动态资源</h3><p>在右侧「动态资源」替换文字和图片，或配置雪碧图、Spine 动作与皮肤。未识别可替换字段时会明确提示；重置按钮恢复原文件。</p><h3>04 · 交接给同事</h3><p>导出报告记录素材 SHA-256、元信息、播放器版本、时间点和预览设置。配置会包含输入的文字，但不包含素材、替换图片或背景截图。通过其他渠道发送素材后，同事先导入相同素材，再恢复配置。</p><button id="restore-config">${icon('upload')}导入检查配置</button><h3>隐私与网络</h3><p>没有账号、云端素材库或服务器。站点加载及内置示例来自当前站点；本地素材不会自动上传。Lottie 远程图片不自动请求，请一并导入本地依赖；外部字体使用系统字体。关闭页面后导入素材不保留。</p>`);$('#restore-config').onclick=()=>{$('#dialog').close();$('#config-input').click();};}
 
 for(const id of ['upload-main','add-files'])$('#'+id).onclick=()=>$('#file-input').click();$('#upload-folder').onclick=()=>$('#folder-input').click();$('#file-input').onchange=e=>importFiles(e.target.files);$('#folder-input').onchange=e=>importFiles(e.target.files);$('#search').oninput=renderLibrary;$('#file-list').onclick=e=>{const b=e.target.closest('[data-id]');if(b)load(entries.find(x=>x.id===b.dataset.id));};
-$('#play').onclick=()=>{if(state.time>=adapter.meta.duration-.05&&!state.playing)seek(state.rangeStart,false).then(()=>setPlaying(true));else setPlaying(!state.playing);};$('#first').onclick=()=>seek(0);$('#last').onclick=()=>seek(adapter?.frameTime?adapter.frameTime(adapter.meta.frames-1):adapter.meta.duration-1/(adapter.meta.fps||30));$('#previous').onclick=()=>step(-1);$('#next').onclick=()=>step(1);$('#timeline').oninput=e=>seek(+e.target.value/1000*adapter.meta.duration);$('#speed').onchange=e=>{state.speed=+e.target.value;adapter?.setSpeed?.(state.speed);};$('#loop').onclick=()=>{state.loop=!state.loop;$('#loop').classList.toggle('on',state.loop);$('#loop').setAttribute('aria-pressed',state.loop);};$('#reset').onclick=()=>active&&load(active);$('#screenshot').onclick=screenshot;$('#fullscreen').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen();else $('#preview').requestFullscreen().catch(e=>toast(e.message));};
+$('#play').onclick=()=>{if(loading||busy||!adapter)return;if(state.time>=adapter.meta.duration-.05&&!state.playing)seek(state.rangeStart,false).then(()=>setPlaying(true));else setPlaying(!state.playing);};$('#first').onclick=()=>seek(0);$('#last').onclick=()=>seek(adapter?.frameTime?adapter.frameTime(adapter.meta.frames-1):adapter.meta.duration-1/(adapter.meta.fps||30));$('#previous').onclick=()=>step(-1);$('#next').onclick=()=>step(1);$('#timeline').oninput=e=>seek(+e.target.value/1000*adapter.meta.duration);$('#speed').onchange=e=>{state.speed=+e.target.value;adapter?.setSpeed?.(state.speed);};$('#loop').onclick=()=>{state.loop=!state.loop;$('#loop').classList.toggle('on',state.loop);$('#loop').setAttribute('aria-pressed',state.loop);};$('#reset').onclick=()=>active&&load(active);$('#screenshot').onclick=screenshot;$('#fullscreen').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen();else $('#preview').requestFullscreen().catch(e=>toast(e.message));};
 document.querySelectorAll('.swatch').forEach(b=>b.onclick=()=>applyBackground(b.dataset.bg));$('#bg-color').oninput=e=>{state.color=e.target.value;$('#stage').style.setProperty('--custom-bg',state.color);applyBackground('custom');};let sceneURL;$('#scene-bg').onclick=()=>$('#scene-input').click();$('#scene-input').onchange=e=>{const file=e.target.files[0];if(!file)return;if(sceneURL)URL.revokeObjectURL(sceneURL);sceneURL=URL.createObjectURL(file);$('#stage').style.setProperty('--scene-image',`url("${sceneURL}")`);applyBackground('scene');};$('#zoom').onchange=e=>{state.zoom=e.target.value;fit();};$('#bounds').onclick=()=>{state.border=!state.border;$('#bounds').setAttribute('aria-pressed',state.border);$('#artboard').classList.toggle('bordered',state.border);};
 $('#range-toggle').onclick=()=>{const el=$('#range-settings');el.hidden=!el.hidden;el.style.display=el.hidden?'none':'flex';};$('#apply-range').onclick=()=>{const a=+$('#range-a').value,b=+$('#range-b').value;if(!adapter||!Number.isFinite(a)||!Number.isFinite(b)||a<0||b<=a||b>adapter.meta.duration+.01)return toast('区间需满足 0 ≤ 起点 < 终点 ≤ 动画时长。');state.rangeStart=a;state.rangeEnd=b;seek(a);toast('A–B 区间已应用');};$('#clear-range').onclick=()=>{state.rangeStart=0;state.rangeEnd=null;toast('已恢复完整时间线');};
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;document.querySelectorAll('[data-tab]').forEach(t=>{t.classList.toggle('active',t===b);t.setAttribute('aria-selected',t===b);});renderInspector();});$('#export-top').onclick=()=>exportRecord(true);$('#export-config').onclick=()=>exportRecord(false);$('#restore-config-direct').onclick=()=>$('#config-input').click();$('#nav-capabilities').onclick=capabilities;$('#nav-guide').onclick=guide;$('#nav-workbench').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});$('#dialog-close').onclick=()=>$('#dialog').close();$('#dialog').onclick=e=>{if(e.target===$('#dialog'))$('#dialog').close();};$('#config-input').onchange=async e=>{try{await restoreConfig(JSON.parse(await e.target.files[0].text()));}catch(err){toast(err.message);}e.target.value='';};
 let dragDepth=0;window.addEventListener('dragenter',e=>{if(e.dataTransfer.types.includes('Files')){e.preventDefault();dragDepth++;$('#drop-overlay').classList.add('visible');}});window.addEventListener('dragleave',()=>{if(--dragDepth<=0){dragDepth=0;$('#drop-overlay').classList.remove('visible');}});window.addEventListener('dragover',e=>e.preventDefault());window.addEventListener('drop',e=>{e.preventDefault();dragDepth=0;$('#drop-overlay').classList.remove('visible');importFiles(e.dataTransfer.files);});
-window.addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||$('#dialog').open)return;if((e.metaKey||e.ctrlKey)&&e.key==='o'){e.preventDefault();$('#file-input').click();}else if(e.code==='Space'){e.preventDefault();setPlaying(!state.playing);}else if(e.key==='ArrowLeft'){e.preventDefault();step(-1);}else if(e.key==='ArrowRight'){e.preventDefault();step(1);}});new ResizeObserver(fit).observe($('#stage-center'));window.addEventListener('beforeunload',()=>{adapter?.destroy?.();urls.forEach(u=>URL.revokeObjectURL(u));if(sceneURL)URL.revokeObjectURL(sceneURL);});
+window.addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||$('#dialog').open)return;if((e.metaKey||e.ctrlKey)&&e.key==='o'){e.preventDefault();$('#file-input').click();}else if(e.code==='Space'){e.preventDefault();if(!loading&&!busy)setPlaying(!state.playing);}else if(e.key==='ArrowLeft'){e.preventDefault();step(-1);}else if(e.key==='ArrowRight'){e.preventDefault();step(1);}});new ResizeObserver(fit).observe($('#stage-center'));window.addEventListener('beforeunload',()=>{adapter?.destroy?.();urls.forEach(u=>URL.revokeObjectURL(u));if(sceneURL)URL.revokeObjectURL(sceneURL);});
 renderLibrary();refreshIcons();load(samples[0]);requestAnimationFrame(tick);
