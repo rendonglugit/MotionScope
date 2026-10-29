@@ -1,5 +1,11 @@
 # MotionScope
 
+[![Live Demo](https://img.shields.io/badge/Live-Demo-8062D6?style=for-the-badge&logo=githubpages&logoColor=white)](https://rendonglugit.github.io/MotionScope/)
+[![Deploy GitHub Pages](https://github.com/rendonglugit/MotionScope/actions/workflows/pages.yml/badge.svg)](https://github.com/rendonglugit/MotionScope/actions/workflows/pages.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+**[🌐 Live Demo · 在线体验](https://rendonglugit.github.io/MotionScope/)** · [格式与使用说明](#导入约定) · [部署状态](https://github.com/rendonglugit/MotionScope/actions/workflows/pages.yml)
+
 为语聊房 / 直播动效交付打造的开源预览与检查工具。纯前端，通过 GitHub Pages 部署；不需要账号、服务器或数据库。
 
 ## 已实现
@@ -39,7 +45,9 @@ pnpm preview
 
 已提供 `.github/workflows/pages.yml`，自动执行锁定依赖安装、测试、构建与 Pages 发布。Vite `base: './'` 支持仓库子路径。`dist/` 为完整静态产物，包括示例、WASM 和依赖许可。不要使用 `file://` 直接打开 HTML。
 
-目标仓库为 `https://github.com/rendonglugit/MotionScope`，已配置为 origin。工作流就绪不表示已远程发布；推送需要有效的 GitHub 写入授权，并需在仓库中启用 Pages 的 GitHub Actions 来源。
+本项目的线上地址为 **[https://rendonglugit.github.io/MotionScope/](https://rendonglugit.github.io/MotionScope/)**。每次推送到 `main` 都会自动执行测试、构建并部署；实际结果以顶部部署状态徽章和 [Actions 运行记录](https://github.com/rendonglugit/MotionScope/actions/workflows/pages.yml) 为准。
+
+首次部署若在 `actions/configure-pages` 提示 `Get Pages site failed / Not Found`，请先确认 Pages 的 Source 为 **GitHub Actions**，再重新运行失败工作流，或推送新的提交触发部署。
 
 ## 导入约定
 
