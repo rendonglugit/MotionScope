@@ -1,0 +1,9 @@
+{
+  "name": "motion-scope",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {"dev":"vite --host 127.0.0.1", "build":"node scripts/collect-licenses.mjs && vite build", "preview":"vite preview --host 127.0.0.1", "test":"node --test tests/*.test.js"},
+  "dependencies": {"lottie-web":"5.13.0", "libpag":"4.1.8", "svgaplayerweb":"2.3.2", "jszip":"3.10.1", "@esotericsoftware/spine-webgl":"~4.2.0", "video-animation-player":"^1.0.0", "yyeva":"1.2.0", "lucide":"0.468.0", "gifuct-js":"^2.1.2", "upng-js":"^2.1.0"},
+  "devDependencies": {"vite":"6.4.1"}
+}

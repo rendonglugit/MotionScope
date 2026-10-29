@@ -1,0 +1,445 @@
+[
+  {
+    "name": "@esbuild/darwin-arm64",
+    "version": "0.25.12",
+    "license": "MIT",
+    "files": [],
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/evanw/esbuild.git"
+    }
+  },
+  {
+    "name": "@esotericsoftware/spine-core",
+    "version": "4.2.120",
+    "license": "LicenseRef-LICENSE",
+    "files": [
+      "_esotericsoftware_spine-core-4.2.120-LICENSE"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/esotericsoftware/spine-runtimes.git"
+    }
+  },
+  {
+    "name": "@esotericsoftware/spine-webgl",
+    "version": "4.2.120",
+    "license": "LicenseRef-LICENSE",
+    "files": [
+      "_esotericsoftware_spine-webgl-4.2.120-LICENSE"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/esotericsoftware/spine-runtimes.git"
+    }
+  },
+  {
+    "name": "@rollup/rollup-darwin-arm64",
+    "version": "4.66.0",
+    "license": "MIT",
+    "files": [],
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/rollup/rollup.git"
+    }
+  },
+  {
+    "name": "@types/estree",
+    "version": "1.0.9",
+    "license": "MIT",
+    "files": [
+      "_types_estree-1.0.9-LICENSE"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+      "directory": "types/estree"
+    }
+  },
+  {
+    "name": "core-util-is",
+    "version": "1.0.3",
+    "license": "MIT",
+    "files": [
+      "core-util-is-1.0.3-LICENSE"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/isaacs/core-util-is"
+    }
+  },
+  {
+    "name": "esbuild",
+    "version": "0.25.12",
+    "license": "MIT",
+    "files": [
+      "esbuild-0.25.12-LICENSE.md"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/evanw/esbuild.git"
+    }
+  },
+  {
+    "name": "fdir",
+    "version": "6.5.0",
+    "license": "MIT",
+    "files": [
+      "fdir-6.5.0-LICENSE"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/thecodrr/fdir.git"
+    }
+  },
+  {
+    "name": "fsevents",
+    "version": "2.3.3",
+    "license": "MIT",
+    "files": [
+      "fsevents-2.3.3-LICENSE"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/fsevents/fsevents.git"
+    }
+  },
+  {
+    "name": "gifuct-js",
+    "version": "2.1.2",
+    "license": "MIT",
+    "files": [
+      "gifuct-js-2.1.2-LICENSE"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/matt-way/gifuct-js.git"
+    }
+  },
+  {
+    "name": "immediate",
+    "version": "3.0.6",
+    "license": "MIT",
+    "files": [
+      "immediate-3.0.6-LICENSE.txt"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/calvinmetcalf/immediate.git"
+    }
+  },
+  {
+    "name": "inherits",
+    "version": "2.0.4",
+    "license": "ISC",
+    "files": [
+      "inherits-2.0.4-LICENSE"
+    ],
+    "repository": "git://github.com/isaacs/inherits"
+  },
+  {
+    "name": "isarray",
+    "version": "1.0.0",
+    "license": "MIT",
+    "files": [],
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/juliangruber/isarray.git"
+    }
+  },
+  {
+    "name": "js-binary-schema-parser",
+    "version": "2.0.3",
+    "license": "MIT",
+    "files": [
+      "js-binary-schema-parser-2.0.3-LICENSE"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/matt-way/jsBinarySchemaParser.git"
+    }
+  },
+  {
+    "name": "jszip",
+    "version": "3.10.1",
+    "license": "(MIT OR GPL-3.0-or-later)",
+    "files": [
+      "jszip-3.10.1-LICENSE.markdown"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/Stuk/jszip.git"
+    }
+  },
+  {
+    "name": "libpag",
+    "version": "4.1.8",
+    "license": "Apache-2.0",
+    "files": [
+      "libpag-4.1.8-LICENSE.txt"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/Tencent/libpag/tree/main/web"
+    }
+  },
+  {
+    "name": "libpag",
+    "version": "4.4.74",
+    "license": "Apache-2.0",
+    "files": [
+      "libpag-4.4.74-LICENSE.txt"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/Tencent/libpag/tree/main/web"
+    }
+  },
+  {
+    "name": "lie",
+    "version": "3.3.0",
+    "license": "MIT",
+    "files": [
+      "lie-3.3.0-license.md"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/calvinmetcalf/lie.git"
+    }
+  },
+  {
+    "name": "lottie-web",
+    "version": "5.13.0",
+    "license": "MIT",
+    "files": [
+      "lottie-web-5.13.0-LICENSE.md"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/airbnb/lottie-web.git"
+    }
+  },
+  {
+    "name": "lucide",
+    "version": "0.468.0",
+    "license": "ISC",
+    "files": [
+      "lucide-0.468.0-LICENSE"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/lucide-icons/lucide.git",
+      "directory": "packages/lucide"
+    }
+  },
+  {
+    "name": "nanoid",
+    "version": "3.3.20",
+    "license": "MIT",
+    "files": [
+      "nanoid-3.3.20-LICENSE"
+    ],
+    "repository": "ai/nanoid"
+  },
+  {
+    "name": "pako",
+    "version": "1.0.11",
+    "license": "(MIT AND Zlib)",
+    "files": [
+      "pako-1.0.11-LICENSE"
+    ],
+    "repository": "nodeca/pako"
+  },
+  {
+    "name": "picocolors",
+    "version": "1.1.1",
+    "license": "ISC",
+    "files": [
+      "picocolors-1.1.1-LICENSE"
+    ],
+    "repository": "alexeyraspopov/picocolors"
+  },
+  {
+    "name": "picomatch",
+    "version": "4.0.7",
+    "license": "MIT",
+    "files": [
+      "picomatch-4.0.7-LICENSE"
+    ],
+    "repository": "micromatch/picomatch"
+  },
+  {
+    "name": "postcss",
+    "version": "8.5.32",
+    "license": "MIT",
+    "files": [
+      "postcss-8.5.32-LICENSE"
+    ],
+    "repository": "postcss/postcss"
+  },
+  {
+    "name": "process-nextick-args",
+    "version": "2.0.1",
+    "license": "MIT",
+    "files": [
+      "process-nextick-args-2.0.1-license.md"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/calvinmetcalf/process-nextick-args.git"
+    }
+  },
+  {
+    "name": "readable-stream",
+    "version": "2.3.8",
+    "license": "MIT",
+    "files": [
+      "readable-stream-2.3.8-LICENSE"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/nodejs/readable-stream"
+    }
+  },
+  {
+    "name": "rollup",
+    "version": "4.66.0",
+    "license": "MIT",
+    "files": [
+      "rollup-4.66.0-LICENSE.md"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/rollup/rollup.git"
+    }
+  },
+  {
+    "name": "safe-buffer",
+    "version": "5.1.2",
+    "license": "MIT",
+    "files": [
+      "safe-buffer-5.1.2-LICENSE"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/feross/safe-buffer.git"
+    }
+  },
+  {
+    "name": "setimmediate",
+    "version": "1.0.5",
+    "license": "MIT",
+    "files": [
+      "setimmediate-1.0.5-LICENSE.txt"
+    ],
+    "repository": "YuzuJS/setImmediate"
+  },
+  {
+    "name": "source-map-js",
+    "version": "1.2.2",
+    "license": "BSD-3-Clause",
+    "files": [
+      "source-map-js-1.2.2-LICENSE"
+    ],
+    "repository": "7rulnik/source-map-js"
+  },
+  {
+    "name": "string_decoder",
+    "version": "1.1.1",
+    "license": "MIT",
+    "files": [
+      "string_decoder-1.1.1-LICENSE"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/nodejs/string_decoder.git"
+    }
+  },
+  {
+    "name": "svgaplayerweb",
+    "version": "2.3.2",
+    "license": "Apache License 2.0",
+    "files": [
+      "svgaplayerweb-2.3.2-LICENSE"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/yyued/SVGAPlayer-Web.git"
+    }
+  },
+  {
+    "name": "tinyglobby",
+    "version": "0.2.17",
+    "license": "MIT",
+    "files": [
+      "tinyglobby-0.2.17-LICENSE"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/SuperchupuDev/tinyglobby.git"
+    }
+  },
+  {
+    "name": "upng-js",
+    "version": "2.1.0",
+    "license": "MIT",
+    "files": [
+      "upng-js-2.1.0-LICENSE"
+    ],
+    "repository": "github:photopea/UPNG.js"
+  },
+  {
+    "name": "util-deprecate",
+    "version": "1.0.2",
+    "license": "MIT",
+    "files": [
+      "util-deprecate-1.0.2-LICENSE"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/TooTallNate/util-deprecate.git"
+    }
+  },
+  {
+    "name": "video-animation-player",
+    "version": "1.0.5",
+    "license": "MIT",
+    "files": []
+  },
+  {
+    "name": "vite",
+    "version": "6.4.1",
+    "license": "MIT",
+    "files": [
+      "vite-6.4.1-LICENSE.md"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/vitejs/vite.git",
+      "directory": "packages/vite"
+    }
+  },
+  {
+    "name": "yyeva",
+    "version": "1.2.0",
+    "license": "Apache-2.0",
+    "files": [],
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/yylive/YYEVA-Web.git",
+      "directory": "packages/yyeva"
+    }
+  },
+  {
+    "name": "zlib.es",
+    "version": "0.6.0",
+    "license": "Zlib",
+    "files": [
+      "zlib.es-0.6.0-LICENSE"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/zprodev/zlib.es.git"
+    }
+  }
+]

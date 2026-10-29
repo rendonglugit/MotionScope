@@ -1,0 +1,34 @@
+[
+  {
+    "name": "rose.svga",
+    "url": "https://raw.githubusercontent.com/svga/SVGAPlayer-Web/a218cbeca656a748d0384a06b07844e91e46b5fa/tests/samples/rose.svga",
+    "bytes": 312550,
+    "sha256": "d67fc4f08589a8a7f3d26616620bcfe2081b46e1f16187fdce608a3821a4d245"
+  },
+  {
+    "name": "yyeva-gift.mp4",
+    "url": "https://raw.githubusercontent.com/yylive/YYEVA-Web/575cf8fc6e0b80b113a57fbd021b44bcd8357cd9/projects/es5-demo/public/demo3/dynamic_264_mid.mp4",
+    "bytes": 320044,
+    "sha256": "4efef419e2fcdead490fbaf2bde4dd7ddc9601e7b18e7fb61f2ef964496ae69e"
+  },
+  {
+    "name": "logo.pag",
+    "url": "https://media.githubusercontent.com/media/Tencent/libpag/8a63822b0f64f899f07e36ca9f6a183adb7e5525/assets/PAG_LOGO.pag",
+    "bytes": 11052,
+    "sha256": "63d66f64839672ac8e177ea6342021f9de03a0f6ee267e16792536e232504749"
+  },
+  {
+    "name": "vap-gift.mp4",
+    "url": "https://github.com/Tencent/vap/tree/master/web/demo/src/components",
+    "npmVersion": "video-animation-player@1.0.5",
+    "bytes": 2608744,
+    "sha256": "ab1e9212e19c3a151732d016322a6fb807b1f6673d4d7c5a60a527bf8c49159c"
+  },
+  {
+    "name": "vap-gift.json",
+    "url": "https://github.com/Tencent/vap/tree/master/web/demo/src/components",
+    "npmVersion": "video-animation-player@1.0.5",
+    "bytes": 36426,
+    "sha256": "3c0383cf46c1b5c7401c601c5250d5ce210f792c758ff60e36c58e769e39abb6"
+  }
+]
